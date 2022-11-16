@@ -1,5 +1,5 @@
 /*************************************************************************
- * GLFW 3.3 - www.glfw.org
+ * GLFW 3.3 - www.glfw_proj.org
  * A library for OpenGL, window and input
  *------------------------------------------------------------------------
  * Copyright (c) 2002-2006 Marcus Geelnard
@@ -711,7 +711,7 @@ extern "C" {
  *  A memory allocation failed.
  *
  *  @analysis A bug in GLFW or the underlying operating system.  Report the bug
- *  to our [issue tracker](https://github.com/glfw/glfw/issues).
+ *  to our [issue tracker](https://github.com/glfw_proj/glfw_proj/issues).
  */
 #define GLFW_OUT_OF_MEMORY          0x00010005
 /*! @brief GLFW could not find support for the requested API on the system.
@@ -755,7 +755,7 @@ extern "C" {
  *
  *  @analysis A bug or configuration error in GLFW, the underlying operating
  *  system or its drivers, or a lack of required resources.  Report the issue to
- *  our [issue tracker](https://github.com/glfw/glfw/issues).
+ *  our [issue tracker](https://github.com/glfw_proj/glfw_proj/issues).
  */
 #define GLFW_PLATFORM_ERROR         0x00010008
 /*! @brief The requested format is not supported or available.
