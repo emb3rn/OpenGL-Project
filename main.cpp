@@ -4,19 +4,6 @@
 #include <cstdio>
 #include <cmath>
 
-struct rgb_int{
-    int order;
-    bool checked = false;
-};
-
-class ProgramClass{
-public:
-    signed int backgroundColor[4] = {1, 0, 0, 255};
-    int prevFrametime = 0;
-    rgb_int* order;
-
-};
-
 void error_callback(int error, const char* description){
     fprintf(stderr, "Error: %s\n", description);
 }
@@ -28,22 +15,68 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
-float rand_number(float max_value){
-    return rand() / (RAND_MAX / max_value);
-}
+class ProgramClass {
+public:
+    float backgroundColor[3] = {255.0, 0.0, 0.0};
 
-float rgb_cycle(int* color){
-    int order[7] = {1, 2, 1, 3, 2, 1, 3}; //1=r, 2=g, 3=b
+    double prev_frametime;
+    GLFWwindow* window;
 
-    for (int i = 0; i < 7; ++i) {
-        if (color[i] > 0){
-            color[i] = color[i] + (0.1*speed);
+    ProgramClass(GLFWwindow* win){ //constructor
+        window = win;
+        prev_frametime = 0;
+    }
+
+    static float RandFloat(float max_value){
+        return rand() / (RAND_MAX / max_value);
+    }
+
+
+    int current_color = 0;
+    int next_color = 1;
+    void RainbowCycle(float* color, float speed) {
+        if (color[next_color] <= 255 - speed){ //if loop because it repeats every frame
+            color[next_color] = color[next_color] + speed;
         }
         else{
-
+            if (color[current_color] > 0){
+                color[current_color] = color[current_color] - speed;
+            }
+            else{
+                current_color = next_color;
+                if (next_color + 1 > 3){
+                    next_color = 0;
+                }
+                else{
+                    next_color = current_color + 1;
+                }
+            }
         }
     }
-}
+
+    void Main(){
+        while (!glfwWindowShouldClose(window)){
+            int width, height, framerate;
+
+            glfwGetFramebufferSize(window, &width, &height);
+            glViewport(0, 0, width, height);
+
+            RainbowCycle(backgroundColor, 5);
+            for (int i = 0; i < 3; ++i) {
+                std::cout << backgroundColor[i] << std::endl;
+            }
+            glClearColor(backgroundColor[0]/255, backgroundColor[1]/255, backgroundColor[2]/255, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            framerate = (1000/(glfwGetTime() - prev_frametime));
+            prev_frametime = glfwGetTime();
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+        glfwDestroyWindow(window);
+        glfwTerminate();
+    }
+};
 
 int main(){
     glfwSetErrorCallback(error_callback);
@@ -56,27 +89,6 @@ int main(){
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
     glfwSetKeyCallback(window, key_callback);
 
-    int prevFrametime = 0; //used for fps calc
-    rgb_int* rgbOrder = new rgb_int[7];
-
-    signed int backgroundColor[4] = {1, 0, 0, 255};
-
-    while (!glfwWindowShouldClose(window)){
-        int width, height;
-
-        glfwGetFramebufferSize(window, &width, &height);
-        glViewport(0, 0, width, height);
-        glClearColor(rand_number(255.0/255.0f), rand_number(255.0/255.0f), rand_number(255.0/255.0f), 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        std::cout << "[fps]: " << 1000/(glfwGetTime() - prevFrametime) << std::endl;
-        //std::cout << "[random color]: " << rand_number(255.0) << std::endl;
-
-        prevFrametime = glfwGetTime();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    ProgramClass Program(window);
+    Program.Main();
 }
