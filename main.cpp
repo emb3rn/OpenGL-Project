@@ -1,4 +1,25 @@
-//TODO: Make a grid out of shapes, each with a rainbow color
+/*
+ * 0 = 255 if current_one >= next one
+ * 1 = 0
+ * 2 = 0
+
+ current_one = 0;
+ next_one = 1;
+
+ if currrent_one = 0:
+    current_one = next_one;
+    next_one = next_one + 1;
+
+    if (next_one >= 3):
+        next_one = 0;
+
+ if next_one < 255:
+    next_one = next_one + 1;
+ else:
+    current_one = current_one - 1;
+
+ */
+
 #include "include/glad.h"
 #include "include/glfw3.h"
 #include <iostream>
@@ -18,10 +39,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 class ProgramClass {
 public:
-    float background_color[3] = {255.0, 0.0, 0.0};
-
+    float background_color[3] = {0.0, 0.0, 0.0};
     double prev_frametime;
     GLFWwindow* window;
+
+    int current_color = 0;
+    int next_color = 1;
 
     ProgramClass(GLFWwindow* win){ //constructor
         window = win;
@@ -32,27 +55,23 @@ public:
         return rand() / (RAND_MAX / max_value);
     }
 
+    void RGBColor(float* color){
 
-    int current_color = 0;
-    int next_color = 1;
-    void RainbowCycle(float* color, float speed) {
-        if (color[next_color] <= 255 - speed){ //if loop because it repeats every frame
-            color[next_color] = color[next_color] + speed;
-        }
-        else{
-            if (color[current_color] > 0){
-                color[current_color] = color[current_color] - speed;
-            }
-            else{
-                current_color = next_color;
-                if (next_color + 1 >= 3){
-                    next_color = 0;
-                }
-                else{
-                    next_color = current_color + 1;
-                }
+        if (color[current_color] == 0){
+            current_color = next_color;
+            next_color = next_color + 1;
+
+            if (next_color == 3){
+                next_color = 0;
             }
         }
+
+       if (color[next_color] < 255.0f){
+           color[next_color] = color[next_color] + 1;
+       }
+       else{
+           color[current_color] = color[current_color] - 1;
+       }
     }
 
     void Main(){
@@ -62,7 +81,8 @@ public:
             glfwGetFramebufferSize(window, &width, &height);
             glViewport(0, 0, width, height);
 
-            RainbowCycle(background_color, 10);
+            //RainbowCycle(background_color, 10);
+            RGBColor(background_color);
 
             glClearColor(background_color[0] / 255, background_color[1] / 255, background_color[2] / 255, 1);
             glClear(GL_COLOR_BUFFER_BIT);
