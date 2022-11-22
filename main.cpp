@@ -1,3 +1,4 @@
+//TODO: Make a grid out of shapes, each with a rainbow color
 #include "include/glad.h"
 #include "include/glfw3.h"
 #include <iostream>
@@ -17,7 +18,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 class ProgramClass {
 public:
-    float backgroundColor[3] = {255.0, 0.0, 0.0};
+    float background_color[3] = {255.0, 0.0, 0.0};
 
     double prev_frametime;
     GLFWwindow* window;
@@ -44,7 +45,7 @@ public:
             }
             else{
                 current_color = next_color;
-                if (next_color + 1 > 3){
+                if (next_color + 1 >= 3){
                     next_color = 0;
                 }
                 else{
@@ -61,11 +62,9 @@ public:
             glfwGetFramebufferSize(window, &width, &height);
             glViewport(0, 0, width, height);
 
-            RainbowCycle(backgroundColor, 5);
-            for (int i = 0; i < 3; ++i) {
-                std::cout << backgroundColor[i] << std::endl;
-            }
-            glClearColor(backgroundColor[0]/255, backgroundColor[1]/255, backgroundColor[2]/255, 1);
+            RainbowCycle(background_color, 10);
+
+            glClearColor(background_color[0] / 255, background_color[1] / 255, background_color[2] / 255, 1);
             glClear(GL_COLOR_BUFFER_BIT);
 
             framerate = (1000/(glfwGetTime() - prev_frametime));
