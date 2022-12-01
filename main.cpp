@@ -1,30 +1,10 @@
-/*
- * 0 = 255 if current_one >= next one
- * 1 = 0
- * 2 = 0
-
- current_one = 0;
- next_one = 1;
-
- if currrent_one = 0:
-    current_one = next_one;
-    next_one = next_one + 1;
-
-    if (next_one >= 3):
-        next_one = 0;
-
- if next_one < 255:
-    next_one = next_one + 1;
- else:
-    current_one = current_one - 1;
-
- */
-
 #include "include/glad.h"
 #include "include/glfw3.h"
 #include <iostream>
 #include <cstdio>
 #include <cmath>
+#include <fstream>
+#include <sstream>
 
 void error_callback(int error, const char* description){
     fprintf(stderr, "Error: %s\n", description);
@@ -37,25 +17,32 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
+static std::string GetGLSLShaderCode(char* file_name){
+    std::ifstream file(file_name);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
 class ProgramClass {
 public:
     float background_color[3] = {0.0, 0.0, 0.0};
     double prev_frametime;
+    int current_color, next_color;
     GLFWwindow* window;
-
-    int current_color = 0;
-    int next_color = 1;
 
     ProgramClass(GLFWwindow* win){ //constructor
         window = win;
         prev_frametime = 0;
+        current_color = 0;
+        next_color = 1;
     }
 
     static float RandFloat(float max_value){
         return rand() / (RAND_MAX / max_value);
     }
 
-    void RGBColor(float* color){
+    void RGBColor(float* color, int speed){
 
         if (color[current_color] == 0){
             current_color = next_color;
@@ -66,12 +53,29 @@ public:
             }
         }
 
-       if (color[next_color] < 255.0f){
-           color[next_color] = color[next_color] + 1;
+       if (color[next_color] < 255.0f - speed){
+           color[next_color] = color[next_color] + (speed + 1);
        }
        else{
-           color[current_color] = color[current_color] - 1;
+           color[current_color] = color[current_color] - (1 + speed);
        }
+    }
+
+    void DrawTriangle(){
+        // I'm going to use GPU buffers for now, although I'll probably try a simpler method later
+        float triangle_vertices[6] = {
+                 0.0f,  0.5f,
+                 0.5f, -0.5f,
+                -0.5f, -0.5f
+        };
+
+        GLuint VertBuffObject;
+
+        glGenBuffers(1, &VertBuffObject); //Create one buffer, with a gl pointer using p_VertBugObj.
+        glBindBuffer(GL_ARRAY_BUFFER, VertBuffObject); // This causes the buffer object to be the current GL ARRAY BUFFER, see line 70
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices, GL_STATIC_DRAW); // Instead of referencing p_VertBufferObj
+
     }
 
     void Main(){
@@ -81,8 +85,7 @@ public:
             glfwGetFramebufferSize(window, &width, &height);
             glViewport(0, 0, width, height);
 
-            //RainbowCycle(background_color, 10);
-            RGBColor(background_color);
+            RGBColor(background_color, 5);
 
             glClearColor(background_color[0] / 255, background_color[1] / 255, background_color[2] / 255, 1);
             glClear(GL_COLOR_BUFFER_BIT);
